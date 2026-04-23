@@ -1,93 +1,88 @@
-# sun1_aggregate_tracking_analysis
+# SUN-1 aggregate tracking analysis
 
+This folder contains an R script used to analyse the movement of SUN-1 aggregates in live imaging experiments.
 
+After in vivo imaging of SUN-1 aggregates, image stacks are first aligned in ImageJ. Individual aggregates are then tracked manually or semi-manually in ImageJ, and the tracking results are exported as an Excel table. The Excel file is subsequently analysed in RStudio with the script provided here.
 
-## Getting started
+This workflow was used for SUN-1 aggregate dynamics analysis following live imaging experiments related to SUN-1 aggregate behaviour in *C. elegans* meiotic nuclei.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Suggested file name
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+`sun1_aggregate_tracking_dynamics_analysis.R`
 
-## Add your files
+## Workflow overview
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+1. Acquire live-imaging stacks of SUN-1 aggregates in vivo.
+2. Align image stacks in ImageJ to correct for sample drift.
+3. Track SUN-1 aggregates in ImageJ.
+4. Export tracking coordinates to Excel.
+5. Open the R script in RStudio and load the Excel file when prompted.
+6. Compute trajectory plots, explored area, speed, total distance, split/fusion events, and residency-time related summaries.
 
+## Input
+
+The script expects an Excel file selected interactively with `file.choose()`.
+
+The table should contain at least the following columns:
+
+- `t`: time point index
+- `d`: aggregate ID / track ID
+- `x`: x coordinate
+- `y`: y coordinate
+
+Each aggregate should have a unique identifier in `d`, and time points should be encoded consistently across tracks.
+
+## What the script does
+
+The script:
+
+- reads the Excel tracking table
+- reorganizes coordinates by track ID
+- recenters all trajectories relative to the first tracked aggregate
+- plots aggregate trajectories
+- estimates the explored area of each trajectory using a convex hull
+- calculates frame-to-frame speed
+- calculates average speed per aggregate
+- estimates total travelled distance
+- derives a simple split/fusion summary from changes in detected tracks over time
+- computes a residency-time related distribution based on persistence across frames
+
+## Output
+
+The current script mainly produces results in the R session and plotting window:
+
+- trajectory plots
+- trajectory plots with convex hull outlines
+- numeric variables generated in memory, including:
+  - `area`
+  - `speed`
+  - `average_speed`
+  - `tot_dist`
+  - `split_fusion`
+  - `time_for_distri`
+
+At present, the script does **not** automatically save plots or write output tables to disk.
+
+## Required R packages
+
+The script uses the following packages:
+
+- `geometry`
+- `readxl`
+- `matlab`
+- `pracma`
+- `dismo`
+
+Install them in R if needed:
+
+```r
+install.packages(c("geometry", "readxl", "matlab", "pracma", "dismo"))
 ```
-cd existing_repo
-git remote add origin https://git.maxperutzlabs.ac.at/verena_jantsch/sun1_aggregate_tracking_analysis.git
-git branch -M main
-git push -uf origin main
-```
 
-## Integrate with your tools
+## Notes and assumptions
 
-* [Set up project integrations](https://git.maxperutzlabs.ac.at/verena_jantsch/sun1_aggregate_tracking_analysis/-/settings/integrations)
-
-## Collaborate with your team
-
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+- The script uses a pixel scaling factor of `107.8` and a time interval of `5` between frames in the speed calculation.
+- Speed is calculated from Euclidean displacement between consecutive frames.
+- The first aggregate is used as the positional reference for alignment of all trajectories.
+- Convex hull calculation can fail for problematic tracks with too few valid points or degenerate geometries; the script handles this by assigning `NA`.
+- The workflow assumes that stack alignment and tracking quality were checked beforehand in ImageJ.
